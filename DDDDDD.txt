@@ -1,0 +1,426 @@
+
+/*
+---******************************************************
+--ACTIVIDAD Actividad Virtual #03 - BDA I
+
+USE BDInmobiliaria
+
+SELECT * from sys.tables
+select * from sys.schemas
+
+--111111111111111111111111----------------------------------------
+delete  from Comercial.ESTADO 
+
+select * from Comercial.ESTADO
+
+INSERT INTO Comercial.ESTADO VALUES('EST001','OCUPADO')
+INSERT INTO Comercial.ESTADO VALUES('EST002','DESOCUPADO')
+INSERT INTO Comercial.ESTADO VALUES('EST003','VIGENTE')
+INSERT INTO Comercial.ESTADO VALUES('EST004','VENCIDO')
+INSERT INTO Comercial.ESTADO VALUES('EST005','HABILITADO')
+INSERT INTO Comercial.ESTADO VALUES('EST006','DESHABILITADO')
+
+
+select * from Arquitectura.EDIFICIOS
+
+INSERT Arquitectura.EDIFICIOS
+(COD_EDIF,NOM_EDIF,DIRECC_EDIF,CODPOSTAL_EDIF,AREA_TOTAL_EDIF,COD_EST)
+values
+('EDF001', 'La Posadera', 'Jr. Lima 123', 'L-01', '450', 'EST005'),
+('EDF002', 'El Corralito', 'Av. Saenz Peña 357','L-14','178','EST006'),
+('EDF003', 'Los Alamos', 'Av. Del Río 666', 'L-21', '246', 'EST005'),
+('EDF004','El Aguajal','Jr. Urdanivia 875', 'L-21','285','EST006'),
+('EDF005', 'Los Cupisnique', 'Av. La Mar 966', 'L-14', '178', 'EST005'),
+('EDF006', 'El Indice','Av. Las Dromelias 777','L-01','246', 'EST006'),
+('EDF007', 'Los Guerreros', 'Moche Av. De los acá', 'L-17', '246', 'EST006')
+GO
+
+---22222222222222222222-------------------------------------
+
+bulk insert Arquitectura.EDIFICIOS
+FROM 'C:\Data\NuevosEdificios.txt'
+with (FieldTerminator=',',
+RowTerminator ='\n')
+go
+
+select * from Arquitectura.EDIFICIOS
+-----3333333333333333333------------------------------------
+use BDConstruccion
+
+select * from sys.tables
+
+select * from TBDEPA
+use BDInmobiliaria
+
+insert Arquitectura.DEPARTAMENTOS
+select 
+COD_EDIF, COD_DEP,AREA_TOTAL_DEP, AREA_CONSTRUIDA_DEP, NUM_AMB_DEP, PISO_DEP, PRECIO_ALQXMES_DEP, COD_EST
+FROM BDConstruccion.. TBDEPA
+
+select * from Arquitectura.DEPARTAMENTOS
+-----444444444444++++++++++++++++++++++++++++++++++++++++ 	
+
+USE BDAdmision
+select * from sys.tables
+SELECT  * FROM USUARIO
+
+use BDInmobiliaria 
+select * from sys.tables
+
+select * from Comercial.USUARIO
+
+insert Comercial.USUARIO
+select COD_USUA,NOM_USUA,APEPATER_USUA,APEMATER_USUA, FEC_NAC_USUA, FEC_REG_USUA, TIPO_DOC_USUA, NUM_DOC_USUA, COD_EST
+FROM BDAdmision .. USUARIO 
+
+SELECT *FROM Comercial.INQUILINO
+SELECT * FROM BDAdmision ..INQUILINO
+
+INSERT Comercial.INQUILINO
+select COD_USUA, NOM_AVAL_INQ, APELL_AVAL, HABER_BAS_INQ,EST_CIVIL_INQ,LUG_TRAB_INQ
+FROM BDAdmision .. INQUILINO 
+
+SELECT * FROM Comercial.PROPIETARIO
+
+INSERT Comercial.PROPIETARIO
+ SELECT COD_USUA, TIPO
+ FROM BDAdmision .. PROPIETARIO
+
+SELECT *FROM Comercial.FAMILIARES
+SELECT * FROM BDAdmision .. FAMILIARES
+
+INSERT Comercial.FAMILIARES
+SELECT COD_FAMI,COD_USUA, NOM_FAMI,APEPATER_FAMI,APEMATER_FAMI,GRADO_PARENTES_FAMI
+FROM BDAdmision .. FAMILIARES
+/*
+USE BDAdmision
+
+SELECT *from USUARIO
+
+select *from INQUILINO
+where COD_USUA = 'USU002' 
+
+DELETE from INQUILINO
+where COD_USUA = 'USU040' 
+
+INSERT INTO INQUILINO VALUES('USU001','PEDRO','RODRIGUEZ','1500','S','AREQUIPA CERRO VERDE')
+*/
+------555555555555------------------------------------
+
+BULK INSERT Comercial.CONTRATO
+FROM 'C:\Data\CONTRATOS.txt'
+with (FieldTerminator=';',
+RowTerminator ='\n');
+go
+------------6666666666666-------
+SET DATEFORMAT ymd
+go
+
+BULK INSERT Comercial.DETALLECONTRATO FROM 'C:\Data\DetalleContratos.txt'
+with ( firstrow =2,
+FieldTerminator=',',
+RowTerminator ='\n'
+);
+go
+
+select * from Comercial.DETALLECONTRATO
+
+-----777777777777--------------
+
+
+
+CREATE TABLE TBASESOR
+(
+codAsesor char(5) not null,
+nombAsesor varchar(30) not null,
+apAsesor varchar(30) not null,
+sueAsesor Smallmoney not null
+)
+
+select * from TBASESOR
+
+--------888888888888888---------
+
+bulk insert  dbo.TBASESOR FROM 'C:\Data\Datos.xls'
+with(
+	FieldTerminator=',',
+	RowTerminator ='\n'
+);
+
+
+---------
+bulk insert  dbo.TBASESOR FROM 'C:\Data\Datos.csv'
+with(
+	FieldTerminator=';',
+	RowTerminator ='\n'
+);
+---------------------------
+
+------9999999999999999-----------------
+
+select * from Arquitectura.DEPARTAMENTOS
+
+
+update Arquitectura.DEPARTAMENTOS
+set PRECIO_ALQXMES_DEP *=1.25
+where PISO_DEP =1
+
+---------10---------------
+select * from Comercial.DETALLECONTRATO
+
+update Comercial.DETALLECONTRATO
+set FEC_FIN_ALQ select(dateadd(MONTH,'3',FEC_FIN_ALQ))  ( from Comercial.DETALLECONTRATO
+select * from Arquitectura.EDIFICIOS)
+
+select distinct ( e.COD_EDIF)  FROM Arquitectura.EDIFICIOS e
+inner  join  Comercial.DETALLECONTRATO  d
+on e.COD_EDIF= d.COD_EDIF 
+where e.CODPOSTAL_EDIF ='L-01' 
+
+update Comercial.DETALLECONTRATO
+set FEC_FIN_ALQ dateadd(MONTH,'3',FEC_FIN_ALQ)
+ where COD_EDIF 
+IN (select distinct ( e.COD_EDIF)  FROM Arquitectura.EDIFICIOS e
+inner  join  Comercial.DETALLECONTRATO  d
+on e.COD_EDIF= d.COD_EDIF 
+where e.CODPOSTAL_EDIF ='L-01' )
+
+**************************************************************************************
+select count(*) from empleados;
+select count(*)  from funciones;
+select count(*)  from sectores;
+select count(*)  from localidades;
+
+SELECT e.*, f.*
+FROM empleados e
+INNER JOIN funciones f ON e.id_funcion=f.id_funcion
+
+SELECT e.*, f.*
+FROM empleados e
+LEFT JOIN funciones f ON e.id_funcion=f.id_funcion
+
+SELECT e.*, f.*
+FROM empleados e
+right JOIN funciones f ON e.id_funcion=f.id_funcion;
+
+SELECT e.*, f.*
+FROM empleados e 
+CROSS JOIN funciones f 
+
+SELECT *
+FROM empleados e
+FULL JOIN funciones f  ON e.id_funcion=f.id_funcion;
+
+SELECT e.*, f.*
+FROM empleados e
+INNER JOIN funciones f ON e.id_funcion=f.id_funcion
+INNER JOIN sectores s ON e.id_sector=s.id_sector
+INNER JOIN localidades l ON e.id_localidad=l.id_localidad;
+
+
+
+/*
+clientes  y ventas
+1000		30000
+
+entonces con left join
+
+encontraremos a quienes no hemos vendido
+----------------------------------------
+
+clientes  y  ventas
+1000			30000
+
+entonces  roght join 
+encuentra ventas no enlazadas
+
+
+*/
+
+use administracion
+
+select * from empleados
+select * from funciones
+
+select e.*, f.* from empleados e
+inner join funciones f
+on e.id_funcion = f.id_funcion
+----------------
+
+
+select e.*, f.* from empleados e
+left join funciones f
+on e.id_funcion = f.id_funcion
+
+---------------------
+select e.*, f.* from empleados e
+right join funciones f
+on e.id_funcion = f.id_funcion
+
+----------------------------------
+select * from empleados
+select * from sectores
+
+select e.*, f.*, s.* from empleados e
+inner join funciones f
+on e.id_funcion = f.id_funcion
+inner join sectores s
+on e.id_sector=s.id_sector
+---------------LEFT JOIN
+select e.*, f.*, s.* from empleados e
+inner join funciones f
+on e.id_funcion = f.id_funcion
+left join sectores s
+on e.id_sector=s.id_sector
+
+--------RIGHT JOIN
+
+select * from sectores
+select e.*, f.*, s.* from empleados e
+inner join funciones f
+on e.id_funcion = f.id_funcion
+right join sectores s
+on e.id_sector=s.id_sector
+
+-----
+select * from empleados
+select * from sectores
+select * from funciones
+select * from localidades
+------FULL JOIN muestra ambos tablas o conjuntos
+select e.*, f.* from empleados e
+full join funciones f
+on e.id_funcion = f.id_funcion
+
+------
+select e.*, f.*, s.*, l.* from empleados e
+inner join funciones f
+on e.id_funcion = f.id_funcion
+inner join sectores s
+on e.id_sector=s.id_sector
+inner join localidades l
+on e.id_localidad= l.id_localidad
+
+------ CROSS  CRUZANDO INFORMACION MULTIPLICA LAS DOS TRABLAS manda el primer campo o tabla
+
+select e.*, f.* from empleados e
+CROSS join funciones f
+
+-------pueden ser diferentes origenes o prod pero tienen que tener los mismos campos
+
+-FULL OUTER JOIN 
+--(Muestra los que coinciden y los que no coinciden en la comparación con ambas tablas)
+Select	CL.*,
+			PC.* 
+From Ventas.clientes CL FULL JOIN Ventas.pedidoscabe PC
+	On CL.IdCliente = PC.IdCliente
+go
+
+/*Combinación Cruzada*/
+Select PR.NomProducto,
+			PV.NomProveedor
+From Compras.productos PR Cross Join Compras.proveedores PV
+Order by PR.NomProducto
+GO
+
+/*UNION*/
+
+select *from Ventas.clientes
+select * from Compras.proveedores
+-------UNIENDO AMBAS TABLAS
+
+Select NomCliente		As [Invitado],
+			'Cliente	'			As [Tipo]
+From Ventas.clientes
+	UNION
+Select NomProveedor As [Invitado],
+			'Proveedor'		As [Tipo]
+from Compras.proveedores
+go
+
+
+----- GROUPO BY  EL CAMPO POR Q AGRUPA TIENE Q ESTAR AL INICIO DE LA CONSULTA
+
+
+select * from Compras.productos
+select count  (*) from Compras.productos
+---
+
+
+
+select IdCategoria, count  (*) from Compras.productos
+group by IdCategoria
+
+select IdCategoria, sum(PrecioUnidad) from Compras.productos
+group by IdCategoria
+
+having  sum(PrecioUnidad) >200
+
+------------------
+------ HAVING = GRUPOS
+------ WHERE = CAMPOS 
+select IdCategoria, count  (*) from Compras.productos
+where  IdCategoria 
+
+select IdCategoria, sum(PrecioUnidad) from Compras.productos
+where IdCategoria in(1,3,5)
+group by IdCategoria 
+
+having  sum(PrecioUnidad) >200
+-------------- proveedores promedio precio unidad
+
+select IdProveedor, avg(PrecioUnidad) promedio from Compras.productos
+group by IdProveedor
+----------- 
+select IdProveedor, avg(PrecioUnidad)  from Compras.productos
+where IdProveedor >10
+-------
+select IdProveedor, avg(PrecioUnidad)  from Compras.productos
+where IdProveedor >10
+group by IdProveedor
+-----------------------
+select IdProveedor, avg(PrecioUnidad)  from Compras.productos
+where IdProveedor >10
+group by IdProveedor
+having avg(PrecioUnidad) between 100 and 150
+
+---+++++++++++++++++++
+
+--precio maximo de nombre de categoria
+
+select * from Compras.productos
+select * from Compras.categorias
+
+------uniendo tablas
+
+select c.Descripcion, p.PrecioUnidad from Compras.productos p
+inner join  Compras.categorias c
+on p.IdCategoria= c.IdCategoria
+------------------
+select c.NombreCategoria, p.PrecioUnidad from Compras.productos p
+inner join  Compras.categorias c
+on p.IdCategoria= c.IdCategoria
+----------------------------------
+select c.NombreCategoria, max (p.PrecioUnidad) from Compras.productos p
+inner join  Compras.categorias c
+on p.IdCategoria= c.IdCategoria
+group by c.NombreCategoria
+
+------ nombres de categorias que inician con a - f y cumplan max y min  precio
+select c.NombreCategoria, max (p.PrecioUnidad), min(p.PrecioUnidad) from Compras.productos p
+inner join  Compras.categorias c
+on p.IdCategoria= c.IdCategoria
+where c.NombreCategoria like '[A-F]%'
+group by c.NombreCategoria
+----------
+select c.NombreCategoria, max (p.PrecioUnidad), min(p.PrecioUnidad) from Compras.productos p
+inner join  Compras.categorias c
+on p.IdCategoria= c.IdCategoria
+where c.NombreCategoria like '[A-F]%'
+group by c.NombreCategoria
+
+having max(p.PrecioUnidad)>100
+
+
+*/
+
