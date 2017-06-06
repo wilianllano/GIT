@@ -1,0 +1,330 @@
+serializacion 
+-------------------------------------------------
+
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
+
+namespace Lab8_1_SerializacionBinaria
+{
+    public partial class Form1 : Form
+    {
+        public Form1()
+        {
+            InitializeComponent();
+        }
+
+        private void btnSerializacion_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog save = new SaveFileDialog();
+            save.Filter = "Archivo binario|*.bin";
+
+            if(save.ShowDialog()==DialogResult.OK)
+            {
+                FileStream f = new FileStream(save.FileName, FileMode.Create);
+                BinaryFormatter bin = new BinaryFormatter();
+                bin.Serialize(f, txtBox.Text);
+                f.Close();
+            }
+
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            txtBox.Clear();
+        }
+
+        private void btnDeserializacion_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog open = new OpenFileDialog();
+            open.Filter = "Archivo binario | *.bin";
+
+            if(open.ShowDialog()==DialogResult.OK)
+            {
+                FileStream f = new FileStream(open.FileName, FileMode.Open);
+                BinaryFormatter bin = new BinaryFormatter();
+                txtBox.Text = bin.Deserialize(f).ToString();
+                f.Close();
+            }
+
+
+        }
+    }
+}
+
+--------------------------------------------------
+serializacion xml
+----------------
+claseeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+public class Alumno
+    {
+        public string DNI { get; set; }
+        public string nombre { get; set; }
+        public string apellido { get; set; }
+        public string fono { get; set; }
+        public DateTime fecnac { get; set; }
+    }
+formmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm
+using System.IO;
+using System.Xml.Serialization;
+
+namespace Lab8_2_xmlSerializacion
+{
+    public partial class Form1 : Form
+    {
+        public Form1()
+        {
+            InitializeComponent();
+        }
+
+        private void btnLimpiar_Click(object sender, EventArgs e)
+        {
+            txtDni.Text = "";
+            txtNombre.Text = "";
+            txtApellido.Text = "";
+            txtFono.Text = "";
+            dtFechaNacimiento.Value = DateTime.Today;
+            txtDni.Focus();
+        }
+
+        private void btnSerializar_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog save = new SaveFileDialog();
+            save.Filter = "Archivo xml|*.xml";
+
+            if(save.ShowDialog()==DialogResult.OK)
+            {
+                Alumno reg = new Alumno();
+                reg.DNI = txtDni.Text;
+                reg.nombre = txtNombre.Text;
+                reg.apellido = txtApellido.Text;
+                reg.fono = txtFono.Text;
+                reg.fecnac = dtFechaNacimiento.Value;
+
+                FileStream f = new FileStream(save.FileName, FileMode.Create);
+
+                XmlSerializer xml = new XmlSerializer(typeof(Alumno));
+
+                xml.Serialize(f, reg);
+                f.Close();
+
+
+            }
+        }
+
+        private void btnDeserializar_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog open = new OpenFileDialog();
+            open.Filter = "Archivo xml|*.xml";
+
+            if(open.ShowDialog()==DialogResult.OK)
+            {
+                FileStream f = new FileStream(open.FileName, FileMode.Open);
+
+                XmlSerializer xml = new XmlSerializer(typeof(Alumno));
+                Alumno reg = (Alumno)xml.Deserialize(f);
+                txtDni.Text = reg.DNI;
+                txtNombre.Text = reg.nombre;
+                txtApellido.Text = reg.apellido;
+                txtFono.Text = reg.fono;
+                dtFechaNacimiento.Value = reg.fecnac;
+                f.Close();
+
+
+            }
+        }
+    }
+}
+
+
+encryptacion
+-----------------------------------------------------------
+
+
+using System.IO;
+using System.Security.Cryptography;
+
+namespace Lab9_2_EncriptarTexto
+{
+    public partial class Form1 : Form
+    {
+        DESCryptoServiceProvider servicio = new DESCryptoServiceProvider();
+
+        byte [] key = new byte[] { 70, 71, 72, 73, 74, 75, 76, 77 };
+        byte[] iv = new byte[] { 60, 61, 62, 63, 64, 65, 66, 67 };
+
+
+
+        public Form1()
+        {
+            InitializeComponent();
+        }
+
+        private void btnCifrado_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog save = new SaveFileDialog();
+            save.Filter = "Archivos de texto |*.txt";
+
+            if(save.ShowDialog()==DialogResult.OK)
+            {
+                MemoryStream ms = new MemoryStream();
+                StreamWriter escritor = new StreamWriter(ms);
+                escritor.Write(textBox1.Text);
+                escritor.Flush();
+
+                FileStream f = new FileStream(save.FileName, FileMode.Create);
+
+                CryptoStream cr = new CryptoStream(f, servicio.CreateEncryptor(key, iv), CryptoStreamMode.Write);
+                cr.Write(ms.ToArray(), 0, ms.ToArray().Length);
+                cr.Close(); f.Close();
+            }
+        }
+
+        private void btnDescifrado_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog open = new OpenFileDialog();
+            open.Filter = "Archivos de texto |*.txt";
+
+            if (open.ShowDialog() == DialogResult.OK)
+            {
+                FileStream f = new FileStream(open.FileName, FileMode.Open);
+
+                CryptoStream cr = new CryptoStream(f, servicio.CreateDecryptor(key,iv),CryptoStreamMode.Read);
+                byte[] dato = new byte[4096];
+                cr.Read(dato, 0, dato.Length);
+
+                MemoryStream ms = new MemoryStream();
+                ms.Write(dato, 0, dato.Length);
+                ms.Position = 0;
+                textBox1.Text = new StreamReader(ms).ReadToEnd();
+
+                cr.Close();
+                f.Close();
+
+            }
+
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            textBox1.Clear();
+        }
+    }
+}
+
+
+---------------------------------------------
+almacenamiento aislado
+
+using System.IO;
+using System.IO.IsolatedStorage;
+using Microsoft.VisualBasic;
+
+namespace Lab10_1_CarpetasAisladas
+{
+
+    public partial class Form1 : Form
+    {
+        IsolatedStorageFile area = IsolatedStorageFile.GetUserStoreForAssembly();
+        public Form1()
+        {
+            InitializeComponent();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            if (area.DirectoryExists(txtNombre.Text))
+            {
+                MessageBox.Show("ya existe");
+            }
+            else
+            {
+                area.CreateDirectory(txtNombre.Text);
+
+                lbCarpetas.Items.Clear();
+
+                foreach (string reg in area.GetDirectoryNames())
+                {
+                    lbCarpetas.Items.Add(reg);
+                }
+
+            }
+        }
+
+        private void btnQuitar_Click(object sender, EventArgs e)
+        {
+            if (!area.DirectoryExists(txtNombre.Text))
+            {
+                MessageBox.Show("la carpeta no existe");
+            }
+            else
+            {
+                area.DeleteDirectory(txtNombre.Text);
+
+                lbCarpetas.Items.Clear();
+
+                foreach (string reg in area.GetDirectoryNames())
+                {
+                    lbCarpetas.Items.Add(reg);
+                }
+            }
+        }
+    }
+}
+
+
+-------------------------------------------
+almacenamiento de archivos ailado
+
+using System.IO;
+using System.IO.IsolatedStorage;
+using Microsoft.VisualBasic;
+
+
+
+namespace Lab10_2_AlmacenamientoAislado
+{
+    public partial class Form1 : Form
+    {
+        IsolatedStorageFile area = IsolatedStorageFile.GetUserStoreForAssembly();
+
+        public Form1()
+        {
+            InitializeComponent();
+        }
+
+        private void btnLimpiar_Click(object sender, EventArgs e)
+        {
+            txtBox.Clear();
+        }
+
+        private void btnGrabar_Click(object sender, EventArgs e)
+        {
+            string nombre = Interaction.InputBox("Ingrese el nombre y extension");
+
+            IsolatedStorageFileStream f = new IsolatedStorageFileStream(nombre, FileMode.Create, area);
+
+            StreamWriter escritor = new StreamWriter(f);
+            escritor.Write(txtBox.Text);
+
+            escritor.Close();
+            f.Close();
+
+        }
+
+        private void btnAbrir_Click(object sender, EventArgs e)
+        {
+            string nombre = Interaction.InputBox("Ingrese el nombre y extensión");
+
+            IsolatedStorageFileStream f = new IsolatedStorageFileStream(nombre, FileMode.Open, area);
+
+            StreamReader lector = new StreamReader(f);
+            txtBox.Text = lector.ReadToEnd();
+            lector.Close();
+            f.Close();
+
+
+        }
+    }
+}
+
+
