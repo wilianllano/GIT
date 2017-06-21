@@ -1,0 +1,87 @@
+use BDInmobiliaria
+go
+
+
+declare @codinquilino varchar(6),@cantfamiliares int
+set @codinquilino='USU010'
+if exists(select*from Comercial.INQUILINO inq where inq.COD_USUA=@codinquilino)
+	begin
+	select @cantfamiliares= count(fam.COD_FAMI) from Comercial.FAMILIARES fam where fam.COD_FAMI in(select fam.COD_FAMI from Comercial.FAMILIARES fam where fam.COD_USUA=@codinquilino)
+	group by fam.COD_FAMI
+	print ('el inquilino con codigo '+ltrim(@codinquilino)+ ' tiene '+ltrim(str(@cantfamiliares))+' Familiares')
+	end
+else
+	RaisError('inexistente',10,1)
+go
+
+--pregunta 2---
+Declare @preciomaximo decimal,@nuevoPrecio decimal,@codedif varchar(6),@coddep varchar(6) 
+set @nuevoPrecio=1600
+set @coddep='DPT001'
+set @codedif='EDF001'
+select @preciomaximo=max(dep.PRECIO_ALQXMES_DEP) from Arquitectura.DEPARTAMENTOS dep
+
+Begin Try
+		begin tran t1
+		update Arquitectura.DEPARTAMENTOS
+		set PRECIO_ALQXMES_DEP = @nuevoPrecio
+		where COD_DEP=@coddep and COD_EDIF=@codedif
+
+		if (@nuevoPrecio>@preciomaximo)
+			begin
+			commit tran t1
+			end
+		else
+		begin
+			rollback tran t1
+			RaisError('Alquiler muy bajo',16,1)
+		end
+End Try
+Begin Catch
+		Print error_message()
+End Catch
+go
+
+select max(dep.PRECIO_ALQXMES_DEP) from Arquitectura.DEPARTAMENTOS dep
+select * from Arquitectura.DEPARTAMENTOS dep
+go
+------pregunta3
+use VENTASCIB
+go
+
+declare @codfact varchar(12),@nomcli varchar(29),@preciototal decimal
+declare cursor1 cursor for
+	select fact.NUM_FAC,cli.RAZ_SOC_CLI from TB_FACTURA fact inner join TB_CLIENTE cli on fact.COD_CLI=cli.COD_CLI
+	open cursor1
+		fetch cursor1 into @codfact,@nomcli
+			while @@FETCH_STATUS=0
+				begin
+				print ('N° Factura: '+@codfact)
+				print ('Cliente: '+@nomcli)
+				print replicate('_',100)
+				print ('producto'+space(20)+'cantidad'+space(20)+'Precio unitario'+space(20)+'subtotal')
+				print replicate('_',100)
+					declare @producto varchar(29),@cantidad int,@precioU decimal
+					declare cursor2 cursor for
+						select pro.DES_PRO,detfact.CAN_VEN, detfact.PRE_VEN from TB_DETALLE_FACTURA detfact
+						inner join TB_PRODUCTO pro on detfact.COD_PRO=pro.COD_PRO where detfact.NUM_FAC=@codfact
+					open cursor2
+					fetch cursor2 into @producto,@cantidad,@precioU
+					set @preciototal=0
+					while @@FETCH_STATUS=0
+						begin
+							set @preciototal=@preciototal+(@cantidad*@precioU)
+							print (@producto+space(20)+ltrim(str(@cantidad))+space(22)+ltrim(str(@precioU))+space(22)+str(@cantidad*@precioU))
+							fetch cursor2 into @producto,@cantidad,@precioU
+						end
+					close cursor2
+					deallocate cursor2
+				print replicate('_',100)
+				print (space(80)+'Total: '+ltrim(str(@preciototal)))
+				print ''
+				fetch cursor1 into @codfact,@nomcli
+				end
+		
+	close cursor1
+deallocate cursor1
+go
