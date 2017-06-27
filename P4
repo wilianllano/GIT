@@ -1,4 +1,88 @@
--------------------procedimientos--almacenados--ADO.NET--------------------------
+------------Consulta de datos parametrizada-----------------------
+<connectionStrings>
+    <add name="cnSQL"
+         connectionString="Data Source=(local); Initial Catalog=Negocios2017;uid=sa;pwd=admin123"/>
+  </connectionStrings>
+------------------------------
+using System.Data.SqlClient;
+using System.Configuration;
+namespace sema13_Consul_parametri_15_1
+{
+    public partial class Form1 : Form
+    {
+        ConnectionStringSettings cadena = ConfigurationManager.ConnectionStrings["cnSQL"];
+        SqlConnection cn = new SqlConnection();
+        public Form1()
+        {
+            InitializeComponent();
+            cn = new SqlConnection(cadena.ConnectionString);
+        }
+        private void Form1_Load(object sender, EventArgs e)
+        {
+        }
+        private void button1_Click(object sender, EventArgs e)
+        {
+            SqlDataAdapter da = new SqlDataAdapter("usp_cliente_nombre", cn);
+            da.SelectCommand.CommandType = CommandType.StoredProcedure;
+            da.SelectCommand.Parameters.Add("@nombre", SqlDbType.VarChar,50).Value=txtNombre.Text;
+            DataTable dt = new DataTable();
+            da.Fill(dt);
+            dgClientes.DataSource = dt;
+        }
+    }
+}
+-------------------
+create proc usp_cliente_nombre
+@nombre varchar(40)
+as
+select * from tb_clientes 
+where NombreCia LIKE @nombre+'%'
+GO
+exec usp_cliente_nombre 'a%'
+++++++++++++++++
+
+----------------------PARAMETROS FECHAS PROCEDIMIENTOS--------------------------------------------
+<connectionStrings>
+    <add name="cnSQL"
+         connectionString="Data Source=(local); Initial Catalog=Negocios2017;uid=sa;pwd=admin123"/>
+  </connectionStrings>
+----------------------
+using System.Data.SqlClient;
+using System.Configuration;
+namespace semana_13_consult_parame_fecha_proc
+{
+    public partial class Form1 : Form
+    {
+        ConnectionStringSettings cadena = ConfigurationManager.ConnectionStrings["cnSQL"];
+        SqlConnection cn = new SqlConnection();
+        public Form1()
+        {
+            InitializeComponent();
+            cn = new SqlConnection(cadena.ConnectionString);
+        }
+        private void btnConsultar_Click(object sender, EventArgs e)
+        {
+            SqlDataAdapter da = new SqlDataAdapter("usp_pedidos_fechas", cn);
+            da.SelectCommand.CommandType = CommandType.StoredProcedure;
+            da.SelectCommand.Parameters.Add("@f1", SqlDbType.DateTime).Value=dtInicio.Value;
+            da.SelectCommand.Parameters.Add("@f2", SqlDbType.DateTime).Value = dtTermino.Value;
+            DataTable dt = new DataTable();
+            da.Fill(dt);
+            dgPedidos.DataSource = dt;
+        }
+    }
+}
+------------------------------------------
+create procedure usp_pedidos_fechas
+@f1 datetime,
+@f2 datetime
+as
+select* from tb_pedidoscabe
+where FechaPedido between @f1 and @f2 
+go
+exec usp_pedidos_fechas -----------------------------------------------++++++++++++++++++
+
+-------------------procedimientos--almacenados--ADO.NET------------------------------------------------------
 using System.Data.SqlClient;
 namespace Semana13_Home1_ADO_Consulta
 {
