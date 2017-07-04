@@ -1,0 +1,246 @@
+-------------SAVE AS------------------------
+using System.Windows.Forms;
+using System.IO;
+using System.IO.Compression;
+/* namespace POOI_EL2_LLANO_WILIAN */
+{
+    public partial class Form1 : Form
+    {   private string archivo = "";
+        public Form1()
+        {  InitializeComponent();
+        }
+        private void btnAbrir_Click(object sender, EventArgs e)
+        {   OpenFileDialog abrir = new OpenFileDialog();
+            abrir.Filter = "Archivo de texto | *.txt";
+            if (abrir.ShowDialog() == DialogResult.OK)
+            {   archivo = abrir.FileName;
+                FileStream f = new FileStream(archivo, FileMode.Open);
+                StreamReader lector = new StreamReader(f);
+                txtBox.Text = lector.ReadToEnd();
+                lector.Close();
+            }
+        }
+        private void btnLimpiar_Click(object sender, EventArgs e)
+        {   txtBox.Text = "";
+            txtBox.Focus();
+        }
+        private void btnGuardar_Click(object sender, EventArgs e)
+        {   try
+            {    if (archivo == "")
+                {   SaveFileDialog guardar = new SaveFileDialog();
+                    guardar.Filter = "Archivo de texto | *.txt";
+                    if (guardar.ShowDialog() == DialogResult.OK)
+                    {   archivo = guardar.FileName;
+                    }
+                }
+                FileStream f = new FileStream(archivo, FileMode.Create);
+                StreamWriter escribir = new StreamWriter(f);
+                escribir.Write(txtBox.Text);
+                escribir.Close();
+            }   catch { }
+        }
+        private void btnGuardarComo_Click(object sender, EventArgs e)
+        {   try
+            {   SaveFileDialog guardarComo = new SaveFileDialog();
+                guardarComo.Filter = "Archivo de texto |*.txt";
+                if (guardarComo.ShowDialog() == DialogResult.OK)
+                {   archivo = guardarComo.FileName;
+                    FileStream f = new FileStream(archivo, FileMode.Create);
+                    StreamWriter escribir = new StreamWriter(f);
+                    escribir.Write(txtBox.Text);
+                    escribir.Close();
+                }
+            }  catch   {  }
+        }
+        //TabControl COMPRIMIR ----------------------------------------------------------------------
+          private void button4_Click(object sender, EventArgs e)
+        {   txtZip.Text = "";
+            txtZip.Focus();
+        }
+        private void button2_Click(object sender, EventArgs e)
+        {   try
+            {   //COMPRIMIR
+                SaveFileDialog zip = new SaveFileDialog();
+                zip.Filter = "Archivos comprimidos|*.zip";
+                if (zip.ShowDialog() == DialogResult.OK)
+                {   MemoryStream ms = new MemoryStream();
+                    StreamWriter escritor = new StreamWriter(ms);
+                    escritor.Write(txtZip.Text);
+                    escritor.Flush();
+                    FileStream f = new FileStream(zip.FileName, FileMode.Create);
+                    GZipStream gz = new GZipStream(f, CompressionMode.Compress);
+                    gz.Write(ms.ToArray(), 0, ms.ToArray().Length);
+                    gz.Close();
+                    f.Close();
+               }
+            }  catch { }
+        }
+        private void button3_Click(object sender, EventArgs e)
+        {  //DESCOMPRIMIR
+            try
+            {   OpenFileDialog abrir = new OpenFileDialog();
+                abrir.Filter = "Archivos comprimidos|*.zip";
+                if (abrir.ShowDialog() == DialogResult.OK)
+                {   FileStream f = new FileStream(abrir.FileName, FileMode.Open);
+                    GZipStream gz = new GZipStream(f, CompressionMode.Decompress);
+                    byte[] datos = new byte[6000];
+                    gz.Read(datos, 0, datos.Length);
+                    MemoryStream ms = new MemoryStream();
+                    ms.Write(datos, 0, datos.Length);
+                    ms.Position = 0;
+                    txtZip.Text = new StreamReader(ms).ReadToEnd();
+                }
+            }  catch { }
+            }     }    }
+=============================================================================================
+------------Consulta de datos parametrizada-----------------------
+<connectionStrings>
+    <add name="cnSQL"
+         connectionString="Data Source=(local); Initial Catalog=Negocios2017;uid=sa;pwd=admin123"/>
+  </connectionStrings>
+------------------------------
+using System.Data.SqlClient;
+using System.Configuration;
+namespace sema13_Consul_parametri_15_1
+{  public partial class Form1 : Form
+    {   ConnectionStringSettings cadena = ConfigurationManager.ConnectionStrings["cnSQL"];
+        SqlConnection cn = new SqlConnection();
+        public Form1()
+        {   InitializeComponent();
+            cn = new SqlConnection(cadena.ConnectionString);
+        }
+        private void Form1_Load(object sender, EventArgs e)
+        { }
+        private void button1_Click(object sender, EventArgs e)
+        {   SqlDataAdapter da = new SqlDataAdapter("usp_cliente_nombre", cn);
+            da.SelectCommand.CommandType = CommandType.StoredProcedure;
+            da.SelectCommand.Parameters.Add("@nombre", SqlDbType.VarChar,50).Value=txtNombre.Text;
+            DataTable dt = new DataTable();
+            da.Fill(dt);
+            dgClientes.DataSource = dt;
+        }    }   }
+-------------------
+create proc usp_cliente_nombre
+@nombre varchar(40)
+as
+select * from tb_clientes 
+where NombreCia LIKE @nombre+'%'
+GO
+exec usp_cliente_nombre 'a%'
+++++++++++++++++
+----------------------PARAMETROS FECHAS PROCEDIMIENTOS--------------------------------------------
+<connectionStrings>
+    <add name="cnSQL"
+         connectionString="Data Source=(local); Initial Catalog=Negocios2017;uid=sa;pwd=admin123"/>
+  </connectionStrings>
+----------------------
+using System.Data.SqlClient;
+using System.Configuration;
+namespace semana_13_consult_parame_fecha_proc
+{   public partial class Form1 : Form
+    {   ConnectionStringSettings cadena = ConfigurationManager.ConnectionStrings["cnSQL"];
+        SqlConnection cn = new SqlConnection();
+        public Form1()
+        {   InitializeComponent();
+            cn = new SqlConnection(cadena.ConnectionString);
+        }
+        private void btnConsultar_Click(object sender, EventArgs e)
+        {   SqlDataAdapter da = new SqlDataAdapter("usp_pedidos_fechas", cn);
+            da.SelectCommand.CommandType = CommandType.StoredProcedure;
+            da.SelectCommand.Parameters.Add("@f1", SqlDbType.DateTime).Value=dtInicio.Value;
+            da.SelectCommand.Parameters.Add("@f2", SqlDbType.DateTime).Value = dtTermino.Value;
+            DataTable dt = new DataTable();
+            da.Fill(dt);
+            dgPedidos.DataSource = dt;
+        }    }   }
+------------------------------------------
+create procedure usp_pedidos_fechas
+@f1 datetime,
+@f2 datetime
+as
+select* from tb_pedidoscabe
+where FechaPedido between @f1 and @f2 
+go
+exec usp_pedidos_fechas -------------------++++++++++++++++++
+
+-------------------procedimientos--almacenados--ADO.NET------------------------------------------------------
+using System.Data.SqlClient;
+namespace Semana13_Home1_ADO_Consulta
+{  public partial class semana13_ado_proced_1 : Form
+    {   SqlConnection cn = new SqlConnection("server=DESKTOP-DKJ4AMC\\MSSQLSERVER2016; database=Negocios2017; uid=sa; pwd=admin123");
+        public semana13_ado_proced_1()
+        {   InitializeComponent();
+        }
+        private void semana13_ado_proced_1_Load(object sender, EventArgs e)
+        {   SqlDataAdapter da = new SqlDataAdapter("usp_Clientes",cn);
+            da.SelectCommand.CommandType = CommandType.StoredProcedure;
+            DataTable dt = new DataTable();
+            da.Fill(dt);
+            dgClientes.DataSource = dt;
+        }     }   }
+------------------consulta tb_cliente ---- combobox--------------------------
+using System.Data.SqlClient;
+namespace Semana13_Home1_ADO_Consulta
+{  public partial class Form1 : Form
+    {   SqlConnection cn = new SqlConnection("server=DESKTOP-DKJ4AMC\\MSSQLSERVER2016; database=Negocios2017; uid=sa; pwd=admin123");
+        public Form1()
+        {   InitializeComponent();
+        }
+        private void Form1_Load(object sender, EventArgs e)
+        {   SqlDataAdapter da = new SqlDataAdapter("select * from tb_clientes",cn);
+            DataTable dt = new DataTable();
+            da.Fill(dt);
+            cboCliente.DataSource = dt;
+            cboCliente.DisplayMember = "NombreCia";
+            cboCliente.ValueMember = "idCliente";
+        }
+        private void btnConsulta_Click(object sender, EventArgs e)
+        {   string codigo = cboCliente.SelectedValue.ToString();
+            SqlDataAdapter da = new SqlDataAdapter("select * from tb_pedidoscabe where idCliente = @id",cn);
+            da.SelectCommand.Parameters.AddWithValue("@id",codigo);
+            DataTable dt = new DataTable();
+            da.Fill(dt);
+            dgClientes.DataSource = dt;
+        }     }    }
+-----------------------------------Procedimiento Almac + ADO appconfig-------------------------------------------
+<connectionStrings>
+    <add name="cnSQL"
+     connectionString="Data Source=DESKTOP-DKJ4AMC\MSSQLSERVER2016; Initial Catalog=Negocios2017; uid=sa; pwd=admin123"/>
+  </connectionStrings> 
+  --------------------
+using System.Data.SqlClient;
+using System.Configuration;
+-------------------------------------------------------------
+namespace semana13_home_cad_conx_ADO_exam
+{   public partial class Form1 : Form
+    {   ConnectionStringSettings cadena = ConfigurationManager.ConnectionStrings["cnSQL"];
+        SqlConnection cn = new SqlConnection();
+            public Form1()
+        {   InitializeComponent();
+        }
+        private void Form1_Load(object sender, EventArgs e)
+        {   cn = new SqlConnection(cadena.ConnectionString);
+            SqlDataAdapter da = new SqlDataAdapter("usp_Productos", cn);
+            da.SelectCommand.CommandType = CommandType.StoredProcedure;
+            DataTable dt = new DataTable();
+            da.Fill(dt);
+            dgProductos.DataSource = dt;
+        }    }   }
+-----------------------------consulta fecha ----------------------------------
+using System.Data.SqlClient;
+namespace seman_13_laboratorio_15_4
+{  public partial class Form1 : Form
+    {   SqlConnection cn = new SqlConnection("server=DESKTOP-DKJ4AMC\\MSSQLSERVER2016; database=Negocios2017;uid=sa;pwd=admin123");
+        public Form1()
+        {   InitializeComponent();
+        }
+        private void Form1_Load(object sender, EventArgs e)
+        {        }
+        private void button1_Click(object sender, EventArgs e)
+        {   int año = int.Parse(txtAño.Text);
+            SqlDataAdapter da = new SqlDataAdapter("select * from  tb_pedidoscabe WHERE year(FechaPedido) LIKE @a", cn);
+            da.SelectCommand.Parameters.AddWithValue("@a", año);
+            DataTable dt = new DataTable();
+            da.Fill(dt);
+            dgPedidos.DataSource = dt;
+        }}}                
