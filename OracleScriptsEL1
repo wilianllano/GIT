@@ -1,0 +1,68 @@
+iniciando:
+
+sys as sysdba;
+
+
+SQL> select * from user_tables;
+
+SQL>conn hr;
+
+
+SQL>select * from user_tables;
+
+SQL> edit init.txt
+
+SQL> START @unidad:\ruta\mi_archivo;
+
+SQL>start @c:\init.txt 
+ 
+
+------------------------
+
+1: sqlplus
+
+2: crear tableSpace con un Usuario con su contraseña.// se crea en SYSTEM USER: CLINICA pass: 	
+
+Usercli
+
+:::SQL> CREATE TABLESPACE DATOS01 DATAFILE 'C:\app\Leydibea\oradata\df_data01.dbf' SIZE 100M 
+
+EXTENT 
+MANAGEMENT LOCAL SEGMENT SPACE MANAGEMENT AUTO;
+DROP TABLESPACE DATOS01 INCLUDING CONTENTS AND DATAFILES;
+select * from USER_TABLESPACES
+:::
+
+3: conectar con el rol  DEFAULT y 
+	tipo de conexion BASIC
+	SID= cibertec
+----- LA CREACION DE UN USUARIO  SE PUEDE HACER MEDIANTE CODIGO O VENTANA DE CREAR UN NUEVO USUARIO
+
+
+	
+4: crear    tabla CONSULTORIO(
+	
+	)
+	create table RECETA(
+	IDRECETA CHAR(7),
+	ESTADO CHAR(1) CONSTRAINT (CHECK IN ('ENTREGADO','NO_ENTREGADO')),
+	FECHAENTREGA DATE
+	);
+5: GENERAR LOS CONSTRAINT DE LAS TABLAS CREADAS 
+
+ 
+
+====================================================================================
+
+*** LOS ARCHIVOS FISICOS QUE EXISTEN EN LA BASE DE DATOS DE ORACLE 
+SON: SYSTEM.DBF  todos los metadata de la base de datos
+	TEMP.DBF todos las consultas de trabajo
+	USERS.DBF consultas en los usuarios
+
+**** CREAR TABLAS Y NO LAS RESTRICCIONES, POR ORDEN 
+	CREAR LAS TABLAS PRIMERO Y LUEGO GENERAR LAS RESTRICCIONES CON ALTER TABLE
+
+
+
+
+====================================================================================
