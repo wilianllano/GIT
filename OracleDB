@@ -54,6 +54,69 @@ ALTER TABLE TELEFONO MODIFY(MARCA NOT NULL);
 -------------------------------------------PREDETERMINAR UNA AGREGACION---------
 ALTER TABLE TELEFONO MODIFY MARCA VARCHAR(30)DEFAULT 'ENTEL';
 
+*****************************************************************************************
+--sqlplus
+--coneccion
+conn sys as sysdba
+-- apagar coneccion
+shutdown
 
+---SQLDEVELOPER Y SQLPUS
+describe [table name]-->describe una tabla :V
+----CREAR TABLA CON SUBCONSULTA
+create table [table name] as
+	select [datos] [nombre del campo],* 
+	from [tabla donde sacaras datos]
+	where[condicion :V];
+------ALTER TABLE
+--COLUMNAS	
+ALTER TABLE [table name]
+	ADD ( [colum name] [exprsiones como not null, etc]);
+	MODIFY ([colum name] [exprsiones como not null, etc]);
+	DROP ([colum name]);*no se puede borrrar columnas de las tablas 				creadas por sys :(
+	SET UNUSED COLUMNS ([column name]);*marcar como no utilizada
+	DROP UNSED COLUMNS
+--RENOMBRAR TABLA
+RENAME [table name] to [new table name];
+--ELIMINAR FILAS
+TRUNCATE TABLE [nombre de la fila];
+---COMENTAR TABLA
+CEMMENT ON TABLE [table name] is'[comentario]';
+---CREAR SECUENCIAS 
+CREATE SEQUENCE [nombre ecuencia]
+	INCREMENT BY [valor de incrmento]
+	STARTWITH [valor de inicio]
+	MAX VALUE [maximo valor que alcanzara]
+	MIN VALUE [minimo valor que alcanzara]
+	[CYCLE|NOCYCLE] * CYCLE si quieres que al llegar al tope se 			reinicie la cuenta
+	[CACHE [numero de elmentos a guardar en la cache]|NOCACHE]
+			* de preferencia no usar;
+****** despues de crear sequencia se puede omitir cualquier atributo
+---USAR SECUENCIA
+[nombre de la secuencia].NEXTVAL;
+--- VALOR ACTUAL DE LA SECUENCIA
+select [nombre secuencia].CURRVAL from dual;
+
+---ALTER SECUENCIA
+ALTER SEQUENCE [nombre secuencia][attributos y valores a alterar];
+--ELIMINAR SECUENCIA
+DROP SEQUENCE[nombre secuencia];
+
+-CREAR INDICE
+CREATE INDEX [nombre indice] ON [nombre tabla]([nombre columna]);
+-ELIMINAR INDICE
+DROP INDEX [nombre incice]
+
+-CREAR SINONIMO
+CREATE [puic o nada] SYNONYM [nombre sinonimo] FOR [nombre objeto]
+---BUSQUEDA DICCIONARIO DE DATOS
+--BUSQUEDA COMENTARIOS
+-ALL_COL_COMMENTS
+-USER_COL_COMMENTS
+-ALL_TAB_COMMENTS
+-USERT_TAB_COMMENTS
+---BUSQUEDA INDICES
+-USER_INDEXES
+-USER_IND_COLUMNS
 
 
