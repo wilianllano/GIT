@@ -27,6 +27,8 @@ Usercli
 
 :::SQL> CREATE TABLESPACE DATOS01 DATAFILE 'C:\app\Leydibea\oradata\df_data01.dbf' SIZE 100M 
 
+EJEMPLO= CREATE TABLESPACE CLINICA DATAFILE 'C:\app\CIBERTEC\oradata\clinica\DB_data01.dbf' SIZE 100M ;
+
 EXTENT 
 MANAGEMENT LOCAL SEGMENT SPACE MANAGEMENT AUTO;
 DROP TABLESPACE DATOS01 INCLUDING CONTENTS AND DATAFILES;
@@ -68,6 +70,7 @@ create any table
 create any secuence
 create any index
 create any synonym
+create any type
 
 ROLES
 resource
