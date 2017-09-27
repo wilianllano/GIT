@@ -77,3 +77,16 @@ resource
 connect
 
 ====================================================================================
+CREATE TABLE CONSULTORIO(
+IDCONSULTA NUMBER(5.0),
+IDDOCTOR VARCHAR(50),
+NOMBREPASS VARCHAR(50) NOT NULL,
+IDRECETA CHAR (7),
+FECHATA DATE
+);
+
+
+ALTER TABLE CONSULTORIO MODIFY (IDCONSULTA CONSTRAINT AUTO INCREMENT(100,1) );
+
+
+----------------------------------------------------------------------------------------------
