@@ -63,6 +63,14 @@ SON: SYSTEM.DBF  todos los metadata de la base de datos
 	CREAR LAS TABLAS PRIMERO Y LUEGO GENERAR LAS RESTRICCIONES CON ALTER TABLE
 
 
+PRIVILEGIOS DEL SISTEMA
+create any table
+create any secuence
+create any index
+create any synonym
 
+ROLES
+resource
+connect
 
 ====================================================================================
