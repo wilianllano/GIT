@@ -1,0 +1,139 @@
+using System.Data.SqlClient;
+using System.Configuration;
+
+
+namespace MantenimientoTabla_logoEmpresa
+{
+    public partial class Form1 : Form
+    {
+        public Form1()
+        {
+            InitializeComponent();
+        }
+
+        SqlConnection cn = new SqlConnection("server=DESKTOP-DKJ4AMC\\MSSQLSERVER2016; DataBase=Negocios2017; uid=sa; pwd=admin123");
+
+
+        DataTable paises()
+        {
+            SqlDataAdapter da = new SqlDataAdapter("usp_pais", cn);
+            DataTable dt = new DataTable();
+            da.Fill(dt);
+            return dt;
+        }
+
+        DataTable empresa()
+        {
+            SqlDataAdapter da = new SqlDataAdapter("usp_empresa",cn);
+            DataTable dt = new DataTable();
+            da.Fill(dt);
+            return dt;
+        }
+        
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            cboPais.DataSource = paises();
+            cboPais.DisplayMember = "nombrepais";
+            cboPais.ValueMember = "idpais";
+
+            dgEmpresa.DataSource = empresa();
+        }
+        private void button4_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog op = new OpenFileDialog();
+            op.Filter = "archivo jpg|*.jpg";
+
+            if (op.ShowDialog() == DialogResult.OK)
+            {
+                pbFoto.Image = Image.FromFile(op.FileName);
+            }
+        }
+
+        private void btnAgregar_Click(object sender, EventArgs e)
+        {
+            System.IO.MemoryStream ms = new System.IO.MemoryStream();
+            pbFoto.Image.Save(ms, System.Drawing.Imaging.ImageFormat.Jpeg);
+
+            SqlCommand cmd = new SqlCommand("usp_addEmpresa", cn);
+            cmd.CommandType = CommandType.StoredProcedure;
+
+            cmd.Parameters.AddWithValue("@ruc", txtCodigo);
+            cmd.Parameters.AddWithValue("@nom", txtNombre);
+            cmd.Parameters.AddWithValue("@pais", cboPais.SelectedIndex.ToString());
+            cmd.Parameters.Add("@f", SqlDbType.Image).Value = ms.GetBuffer();
+
+            cn.Open();
+            try
+            {
+                int i = cmd.ExecuteNonQuery();
+                MessageBox.Show(i.ToString() + "registro agregado");
+            }
+            catch(SqlException ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+            finally
+            {
+                cn.Close();
+            }
+            dgEmpresa.DataSource = empresa();
+        }
+
+        private void btnActualizar_Click(object sender, EventArgs e)
+        {
+            System.IO.MemoryStream ms = new System.IO.MemoryStream();
+            pbFoto.Image.Save(ms, System.Drawing.Imaging.ImageFormat.Jpeg);
+
+            SqlCommand cmd = new SqlCommand("usp_updateEmpresa", cn);
+            cmd.CommandType = CommandType.StoredProcedure;
+
+            cmd.Parameters.AddWithValue("@ruc", txtCodigo);
+            cmd.Parameters.AddWithValue("@nom", txtNombre);
+            cmd.Parameters.AddWithValue("@pais", cboPais.SelectedIndex.ToString());
+            cmd.Parameters.Add("@f", SqlDbType.Image).Value = ms.GetBuffer();
+
+            cn.Open();
+            try
+            {
+                int i = cmd.ExecuteNonQuery();
+                MessageBox.Show(i.ToString() + "registro actualizado");
+            }
+            catch (SqlException ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+            finally
+            {
+                cn.Close();
+            }
+            dgEmpresa.DataSource = empresa();
+        }
+
+        private void btneliminar_Click(object sender, EventArgs e)
+        {
+            System.IO.MemoryStream ms = new System.IO.MemoryStream();
+            pbFoto.Image.Save(ms, System.Drawing.Imaging.ImageFormat.Jpeg);
+
+            SqlCommand cmd = new SqlCommand("usp_deleteEmpresa", cn);
+            cmd.CommandType = CommandType.StoredProcedure;
+
+            cmd.Parameters.AddWithValue("@ruc", txtCodigo);
+           
+            cn.Open();
+            try
+            {
+                int i = cmd.ExecuteNonQuery();
+                MessageBox.Show(i.ToString() + "registro eliminado");
+            }
+            catch (SqlException ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+            finally
+            {
+                cn.Close();
+            }
+            dgEmpresa.DataSource = empresa();
+        }
+    }
+}
