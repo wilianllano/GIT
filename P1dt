@@ -1,0 +1,97 @@
+using System.Configuration;
+using System.Data.SqlClient;
+
+namespace semana3sesion1MantenimientoPaises
+{
+    public partial class Form1 : Form
+    {
+        SqlConnection cn = new SqlConnection("server=DESKTOP-DKJ4AMC\\MSSQLSERVER2016; database=Negocios2017; uid=sa; pwd=admin123");
+
+        public Form1()
+        {
+            InitializeComponent();
+        }
+        DataTable paises()
+        {
+            SqlDataAdapter da = new SqlDataAdapter("usp_paises",cn);
+            DataTable dt = new DataTable();
+
+            da.Fill(dt);
+            return dt;
+        }
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            dgPaises.DataSource = paises();
+        }
+
+        private void tbnAgregar_Click(object sender, EventArgs e)
+        {
+            cn.Open();
+                    using (SqlTransaction tr = cn.BeginTransaction(IsolationLevel.Serializable))
+            {
+                SqlCommand cmd = new SqlCommand("usp_addpais", cn,tr);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@idpais", txtCodigo.Text);
+                cmd.Parameters.AddWithValue("@nombrepais", txtNombre.Text);
+                try
+                {
+                    int i = cmd.ExecuteNonQuery();
+                    tr.Commit();
+                    MessageBox.Show(i.ToString() + "Registro ingresado");
+                }
+                catch (SqlException ex)
+                {
+                    MessageBox.Show(ex.Message);
+                    tr.Rollback();
+                }
+                cn.Close();
+                dgPaises.DataSource = paises();
+            }
+          }
+        private void btnActualizar_Click(object sender, EventArgs e)
+        {
+                SqlCommand cmd = new SqlCommand("usp_updatepais", cn);
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.Parameters.AddWithValue("@idpais", txtCodigo);
+                cmd.Parameters.AddWithValue("@nombrepais", txtNombre);
+                cn.Open();
+            try
+                {
+                    int i = cmd.ExecuteNonQuery();
+                    MessageBox.Show(i.ToString() + "Registro Actualizado");
+                }
+                catch (SqlException ex)
+                {
+                    MessageBox.Show(ex.Message);
+                 }
+            finally
+            {
+                cn.Close();
+            }
+                dgPaises.DataSource = paises();
+            }
+          
+        private void btnEliminar_Click(object sender, EventArgs e)
+        {
+                SqlCommand cmd = new SqlCommand("usp_delete", cn);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@idpais", txtCodigo);
+                cmd.Parameters.AddWithValue("@nombrepais", txtNombre);
+                cn.Open();
+                try
+                {
+                    int i = cmd.ExecuteNonQuery();
+                    MessageBox.Show(i.ToString() + "Registro eliminado");
+                }
+                catch (SqlException ex)
+                {
+                    MessageBox.Show(ex.Message);
+                 }
+                finally
+                {
+                    cn.Close();
+                }
+                 dgPaises.DataSource = paises();
+            }
+               }}
