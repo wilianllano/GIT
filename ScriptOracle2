@@ -1,0 +1,14 @@
+--upper
+select nombre, upper(nombre) from empleado;
+--lower
+select nombre, lower(nombre) from empleado;
+--initcap
+select nombre, initcap(nombre) from empleado;
+--length
+select nombre, length(nombre) from empleado;
+--substr
+select nombre, substr(nombre, 1,4) from empleado;
+--to_char
+select nombre, to_char(fecha,'DD-MON-YY HH24:MI:SS') from empleado;
+
+
