@@ -1,0 +1,130 @@
+select * from EMPLEADOS;
+
+select NOMEMPLEADO, SUBSTR(NOMEMPLEADO,3,4) from EMPLEADOS;
+
+select NOMEMPLEADO,LENGTH(NOMEMPLEADO) from EMPLEADOS;
+
+select FECHAPEDIDO,TO_CHAR(FECHAPEDIDO,'DD-MON-YYYY HH24:MI:SS') from PEDIDOSCABE;
+
+select nomempleado, upper(nomempleado) from empleados;
+
+select nomempleado, lower(nomempleado)from empleados;
+
+-------------------------------------------------------
+2. crear un procedimiento para 
+
+En la tabla employees mostrar el apellido y nombre concatenado, el correo electrónico (compuesto por los campos email @ department_name .hr.com) todo en minúsculas, el número de teléfono separado por espacios en blanco (515 123 5555) de todos los empleados que tiene un código postal con 5 dígitos.
+PROCEDIMIENTO 
+En la tabla employees mostrar el apellido y nombre concatenado,
+el correo electrónico (compuesto por los campos email @ 
+department_name .hr.com) todo en minúsculas, el número de teléfono 
+separado por espacios en blanco (515 123 5555) de todos los empleados 
+que tiene un código postal con 5 dígitos.
+-- PARAMETROS
+IDEMPLEADO Y CANT DE DIGITOS
+-- ARMAR CONSULTA (FUNCIONES ESCALARES DE )
+SELECT concat(concat(e.first_name,' '), e.last_name) empleado,
+lower(CONCAT(CONCAT(CONCAT(e.email,'@'), d.department_name),
+'.HR.COM')) email,REPLACE(e.phone_number,'.',' ') fono FROM employees e 
+inner join departments d on e.department_id= d.department_id
+inner join locations l on d.location_id= l.location_id
+where e.employee_id= 198   and length(l.postal_code)=5
+
+select * from employees
+-- CONSTRUIR LA FUNCION
+CREATE OR REPLACE procedure consulta1
+(pide NUMBER,plcad NUMBER )
+as
+begin
+  DECLARE cursor c1 is SELECT concat(concat(e.first_name,' '), e.last_name)
+  empleado,lower(CONCAT(CONCAT(CONCAT(e.email,'@'), d.department_name),
+    '.HR.COM')) email,REPLACE(e.phone_number,'.',' ') fono FROM employees e 
+    inner join departments d on e.department_id= d.department_id
+    inner join locations l on d.location_id= l.location_id
+    where e.employee_id= pide   and length(l.postal_code)=plcad;
+  begin
+    for v_reg in c1 loop
+      dbms_output.put_line(v_reg.empleado||'---'||v_reg.email||'-----'||v_reg.fono);
+    end loop;
+  end;
+end;
+-- EJECUTAR
+execute consulta1(198,5);
+---------------------------------------------
+4.- Crear un procedimiento que genere un reporte que muestre los productos
+vendidos por empleado, mostrándolos por categorías además de la cantidad 
+de productos en cada categoria
+Empleado            c1  select e.idempleado,e.nomempleado from empleados e
+  Categoría         c2  select * from categorias inner ... (CONT...)
+    Producto1       c3
+    Producto2 
+  Categoría
+    Producto1 
+    Producto2 
+Empleado
+  Categoría
+    Producto1 
+    Producto2 
+  Categoría
+    Producto1 
+    Producto2 
+Cantidad de productos vendidos por “código del vendedor”
+
+
+categorias (CONT...)
+
+    
+    select * from empleados
+    select * from pedidoscabe
+    select * from pedidosdeta
+    select * from productos
+    select * from categorias
+
+    --------
+    
+    select pro.idcategoria, cat.nombrecategoria, count(*) from empleados e
+    inner join pedidoscabe pc on e.idempleado= pc.idempleado
+    inner join pedidosdeta pd on pc.idpedido=pd.idpedido
+    inner join productos pro on pd.idproducto= pro.idproducto
+    inner join categorias cat on pro.idcategoria= cat.idcategoria
+    where pc.idempleado=7
+    group by pro.idcategoria,cat.nombrecategoria
+
+declare cursor c2 is   select pro.idcategoria, cat.nombrecategoria, count(*) from empleados e
+    inner join pedidoscabe pc on e.idempleado= pc.idempleado
+    inner join pedidosdeta pd on pc.idpedido=pd.idpedido
+    inner join productos pro on pd.idproducto= pro.idproducto
+    inner join categorias cat on pro.idcategoria= cat.idcategoria
+    where pc.idempleado=7
+    group by pro.idcategoria,cat.nombrecategoria
+  begin
+    for v_reg2 in c2 loop
+        dbms_output.put_line(v_reg2.idcategoria||'----'v_reg2.nombrecategoria);
+    end loop;
+  end;
+  -----------UNIR CURSORES
+  set serveroutput on ; 
+  declare cursor c1 is select idempleado,nomempleado from empleados;
+  begin
+    for v_reg1 in c1
+    loop
+      dbms_output.put_line(v_reg1.idempleado||'  ' ||v_reg1.nomempleado);
+      -----------
+      declare cursor c2 is   select pro.idcategoria, cat.nombrecategoria, count(*) from empleados e
+      inner join pedidoscabe pc on e.idempleado= pc.idempleado
+      inner join pedidosdeta pd on pc.idpedido=pd.idpedido
+      inner join productos pro on pd.idproducto= pro.idproducto
+      inner join categorias cat on pro.idcategoria= cat.idcategoria
+      where pc.idempleado=v_reg1.idempleado
+      group by pro.idcategoria,cat.nombrecategoria;
+      begin
+        for v_reg2 in c2 loop
+            dbms_output.put_line(v_reg2.idcategoria||'----'||v_reg2.nombrecategoria);
+            
+        end loop;
+      end;
+      -----------
+    end loop;
+  end;
+    
+----------------------------------------------------------
