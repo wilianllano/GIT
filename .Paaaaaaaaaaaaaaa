@@ -173,4 +173,29 @@ public partial class Form1 : Form
             txtPrecio.Text = dgMuebles.CurrentRow.Cells[3].Value.ToString();
         }
     }
+    ---------------------------------------------------------------------------------------
+    LINQ
+    -----
+    namespace EL_Wilian2
+{
+    public partial class Form1 : Form
+    {   public Form1()
+        {  InitializeComponent();    }
+
+        Negocios2017DataContext db = new Negocios2017DataContext();
+
+        private void Form1_Load(object sender, EventArgs e)
+        {   cboEmpleado.DataSource = db.usp_listar_empleados();
+            cboEmpleado.DisplayMember = "Nomempleado";
+            cboEmpleado.ValueMember = "IdEmpleado";
+        }
+        private void btnConsulta_Click(object sender, EventArgs e)
+        {   int id = int.Parse(cboEmpleado.SelectedValue.ToString());
+            DateTime f1 = dtpFecha1.Value;
+            DateTime f2 = dtpFecha2.Value;
+            dgPedido.DataSource = db.usp_listar_pedidoscab(id, f1,f2);
+            txtCantidad.Text = dgPedido.RowCount.ToString();
+        }
+    }
+}
 */
