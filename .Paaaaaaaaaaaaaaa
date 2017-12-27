@@ -1,0 +1,170 @@
+/*
+create table tb_muebles(
+	idmue int primary key,
+	desmue varchar(100),
+	idproveedor int references tb_proveedores,
+	preUni decimal,
+	fechacompra Datetime
+)
+create procedure ups_listar_proveedores as select * from tb_proveedores
+create procedure usp_listar_muebles as select * from tb_muebles
+
+create procedure usp_agregar_muebles
+@idmueble int,
+@desc varchar(100),
+@idProveedor int,
+@precio decimal,
+@fecha datetime
+as
+insert into tb_muebles values(@idmueble,@desc,@idProveedor,@precio,@fecha)
+
+create procedure usp_actualizar_muebles
+@idmueble int,
+@desc varchar(100),
+@idProveedor int,
+@precio decimal,
+@fecha datetime
+as
+update tb_muebles
+SET desmue=@desc, idproveedor=@idProveedor,preUni=@precio,fechacompra=@fecha
+where idmue=@idmueble
+
+create procedure usp_listar_empleados as select * from tb_empleados
+
+create procedure usp_listar_pedidoscab
+@idEmpleado int,
+@fecha1 datetime,
+@fecha2 datetime
+as
+select * from tb_pedidoscabe where IdEmpleado=@idEmpleado and FechaPedido between @fecha1 and @fecha2
+-----------------------------------------------------------------------------------------------------
+iSERVICE.CS
+-----------
+[ServiceContract]
+    public interface IServiceWilian1
+    {   [OperationContract] DataSet Muebles();
+        [OperationContract] DataSet Proveedor();
+        [OperationContract] string Agregar(Mueble reg);
+        [OperationContract] string Actualizar(Mueble reg); 
+    }
+    [DataContract]   public class Mueble
+    {   private int idmueble,idproveedor;
+        private string descripcion, fecha;
+        private decimal precio;
+        [DataMember]
+        public int Idmueble
+        {   get { return idmueble; }      set { idmueble = value; }
+        }
+        [DataMember]    public int Idproveedor
+        {       get { return idproveedor; }      set { idproveedor = value; }
+        }
+        [DataMember]    public string Descripcion
+        {       get { return descripcion; }      set { descripcion = value; }
+        }
+        [DataMember]    public string Fecha    
+        {  get { return fecha; }   set { fecha = value; }
+        }
+        [DataMember]    public decimal Precio
+        {  get { return precio; }  set { precio = value; }
+        }
+-----------------------------------------------------------------------------------------------
+SERVICE.SVC.CS
+--------------
+public class ServiceWilian1 : IServiceWilian1
+    {     SqlConnection cn = new SqlConnection("server=.; database=Negocios2017; uid=sa; pwd=admin123");
+        public DataSet Muebles()
+        {  DataSet ds = new DataSet();
+            SqlDataAdapter da = new SqlDataAdapter("usp_listar_muebles", cn);
+            da.Fill(ds);
+            return ds;
+        }
+        public DataSet Proveedor()
+        {  throw new NotImplementedException();
+        }
+        public DataSet Proveedores()
+        {   DataSet ds = new DataSet();
+            SqlDataAdapter da = new SqlDataAdapter("usp_lista_proveedores", cn);
+            da.Fill(ds);
+            return ds;
+        }
+        public string Actualizar(Mueble reg)
+        {   string msg = "";
+            SqlCommand cmd = new SqlCommand("usp_actualizar_muebles",cn);
+            cmd.CommandType = CommandType.StoredProcedure;//////
+            cmd.Parameters.AddWithValue("@idmueble", reg.Idmueble);
+            cmd.Parameters.AddWithValue("@desc", reg.Descripcion);
+            cmd.Parameters.AddWithValue("@idproveedor", reg.Idproveedor);
+            cmd.Parameters.AddWithValue("@precio", reg.Precio);
+            cmd.Parameters.AddWithValue("@fecha", reg.Fecha);
+            cn.Open();
+            try
+            {   int i = cmd.ExecuteNonQuery();
+                msg = i.ToString() + "Mueble Actualizado";
+            }  catch (Exception ex)
+            { msg = ex.Message;
+            } finally
+            {  cn.Close();
+            }
+            return msg;
+        }
+        public string Agregar(Mueble reg)
+        {   string msg = "";
+            SqlCommand cmd = new SqlCommand("usp_agregar_muebles",cn);
+            cmd.CommandType = CommandType.StoredProcedure;
+           cmd.Parameters.AddWithValue("@idmueble", reg.Idmueble);
+            cmd.Parameters.AddWithValue("@desc", reg.Descripcion);
+            cmd.Parameters.AddWithValue("@idproveedor", reg.Idproveedor);
+            cmd.Parameters.AddWithValue("@precio", reg.Precio);
+            cmd.Parameters.AddWithValue("@fecha", reg.Fecha);
+            cn.Open();
+            try
+            {  int i = cmd.ExecuteNonQuery();
+                msg = i.ToString() + "Mueble Agregado";
+            }  catch (Exception ex)
+            {  msg = ex.Message;
+            }  finally
+            {  cn.Close();
+            }
+            return msg;
+        }
+   }
+}
+-----------------------------------------------------------------------------------------------------
+FORMS 
+-----
+public partial class Form1 : Form
+    {
+        public Form1()
+        {     InitializeComponent();    }
+
+        ServiceWilian1 service = new ServiceWilian1();
+        private void Form1_Load(object sender, EventArgs e)
+        {   cboProveedor.DataSource = service.Proveedores().Tables[0];
+            cboProveedor.DisplayMember = "NombreCia";
+            cboProveedor.ValueMember = "IdProveedor";
+            dgMuebles.DataSource = service.Muebles().Tables[0];
+        }
+        private void btnAgregar_Click(object sender, EventArgs e)
+        {   Mueble reg = new Mueble();
+            reg.Idmueble = int.Parse(txtCodigo.Text);
+            reg.Descripcion = txtDescripcion.Text;
+            reg.Idproveedor = int.Parse(cboProveedor.SelectedValue.ToString());
+            reg.Precio = decimal.Parse(txtPrecio.Text);
+            reg.Fecha = dtFecha.Value.ToString();
+            string msg = service.Agregar(reg);
+            MessageBox.Show(msg);
+            dgMuebles.DataSource = service.Muebles().Tables[0];
+        }
+        private void btnActualizar_Click(object sender, EventArgs e)
+        {   Mueble reg = new Mueble();
+            reg.Idmueble = int.Parse(txtCodigo.Text);
+            reg.Descripcion = txtDescripcion.Text;
+            reg.Idproveedor = int.Parse(cboProveedor.SelectedValue.ToString());
+            reg.Precio = decimal.Parse(txtPrecio.Text);
+            reg.Fecha = dtFecha.Value.ToString();
+            string msg = service.Actualizar(reg);
+            MessageBox.Show(msg);
+            dgMuebles.DataSource = service.Muebles().Tables[0];
+        }
+    }
+*/
