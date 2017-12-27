@@ -166,5 +166,11 @@ public partial class Form1 : Form
             MessageBox.Show(msg);
             dgMuebles.DataSource = service.Muebles().Tables[0];
         }
+	private void dgMuebles_CellClick(object sender, DataGridViewCellEventArgs e)
+        {   txtCodigo.Text = dgMuebles.CurrentRow.Cells[0].Value.ToString();
+            txtDescripcion.Text = dgMuebles.CurrentRow.Cells[1].Value.ToString();
+            cboProveedor.SelectedValue = dgMuebles.CurrentRow.Cells[2].Value.ToString();
+            txtPrecio.Text = dgMuebles.CurrentRow.Cells[3].Value.ToString();
+        }
     }
 */
